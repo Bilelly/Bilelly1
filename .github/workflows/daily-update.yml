@@ -1,29 +1,37 @@
 name: Daily Update
-
-on:
+on: 
   schedule:
-    - cron: '0 9 * * *'
-  workflow_dispatch:
+    - cron: '0 9 * * *'  #  Runs at 09:00
+  workflow_dispatch:      # permet de lancer manuellement
 
 jobs:
   update:
     runs-on: ubuntu-latest
-    
+
     steps:
+      # 1. Checkout du repo
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Generate random commits
+        uses: actions/checkout@v4
+
+      # 2. Configurer Git (IMPORTANT pour éviter ton erreur)
+      - name: Configure Git
+        run: |
+          git config --global user.name "Bilal Sayoud"
+          git config --global user.email "92954455+Bilelly@users.noreply.github.com"
+
+      # 3. Générer des commits
+      - name: Generate commits
         run: |
           RANDOM_NUM=$((RANDOM % 8 + 1))
           echo "Generating $RANDOM_NUM commits..."
-          
+
           for i in $(seq 1 $RANDOM_NUM); do
-            echo "Update $i at $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> updates.txt
-            git add updates.txt
-            git commit -m "Daily update commit #$i - $(date -u '+%Y-%m-%d')" || true
+            echo "$(date)" >> log.txt
+            git add log.txt
+            git commit -m "Auto commit $i"
           done
-          
+
+      # 4. Push vers GitHub
+      - name: Push changes
+        run: |
           git push
